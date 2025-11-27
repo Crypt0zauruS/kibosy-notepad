@@ -1,0 +1,52 @@
+/* ========================================
+   KIBOSY NOTEPAD - STYLES GLOBAUX
+   ======================================== */
+
+:root {
+  /* Couleurs mahoraises */
+  --color-forest: #047857;
+  --color-lagoon: #0ea5e9;
+  --color-coral: #ef4444;
+  --color-sand: #fbbf24;
+  --color-emerald: #10b981;
+
+  /* Thème clair */
+  --bg-light: #ffffff;
+  --bg-light-secondary: #f3f4f6;
+  --text-light: #111827;
+  --text-light-muted: #6b7280;
+  --border-light: #e5e7eb;
+
+  /* Thème sombre */
+  --bg-dark: #0f172a;
+  --bg-dark-secondary: #1e293b;
+  --text-dark: #f1f5f9;
+  --text-dark-muted: #94a3b8;
+  --border-dark: #334155;
+
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
