@@ -144,13 +144,16 @@
   width: 100%;
   height: 100%;
   padding: 1rem;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: Menlo, Consolas, 'DejaVu Sans Mono', Monaco, monospace;
   font-size: 1rem;
   line-height: 1.6;
   resize: none;
   border-radius: 0.5rem;
   outline: none;
   transition: border-color 0.2s;
+  /* Force rendu Unicode propre */
+  unicode-bidi: embed;
+  direction: ltr;
 }
 
 .main-textarea:focus {
@@ -261,4 +264,43 @@
 
 .dark .main-textarea::-webkit-scrollbar-thumb:hover {
   background: var(--text-dark-muted);
+}
+
+/* ========================================
+   KIBOSY KEYBOARD
+   ======================================== */
+.kibosy-keyboard {
+  z-index: 1000;
+  cursor: default;
+}
+
+.kibosy-keyboard .drag-handle {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Scrollbar personnalisée pour le contenu du clavier */
+.kibosy-keyboard ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kibosy-keyboard ::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  margin: 4px 0;
+}
+
+.kibosy-keyboard ::-webkit-scrollbar-thumb {
+  background: rgba(239, 68, 68, 0.4);
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.kibosy-keyboard ::-webkit-scrollbar-thumb:hover {
+  background: rgba(239, 68, 68, 0.6);
+}
+
+/* Amélioration du curseur sur les boutons */
+.kibosy-keyboard button {
+  cursor: pointer !important;
 }

@@ -31,7 +31,7 @@ function App() {
   const [isDark, setIsDark] = useState(true);
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const autosaveTimerRef = useRef<number>();
   const lastSavedTextRef = useRef("");
@@ -231,19 +231,23 @@ function App() {
       const textarea = textareaRef.current;
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
-      const currentText = textarea.value;
-      
-      // Manipuler directement le textarea DOM
-      const newText = currentText.slice(0, start) + letter + currentText.slice(end);
-      textarea.value = newText;
-      
-      // Positionner le curseur IMMÉDIATEMENT après avoir changé la valeur
-      const newPosition = start + letter.length;
-      textarea.setSelectionRange(newPosition, newPosition);
-      textarea.focus();
-      
-      // Synchroniser avec React state
+
+      // Créer le nouveau texte
+      const before = textarea.value.substring(0, start);
+      const after = textarea.value.substring(end);
+      const newText = before + letter + after;
+
+      // Nouvelle position du curseur
+      const newCursorPos = start + letter.length;
+
+      // Mettre à jour le texte et positionner le curseur
       setText(newText);
+
+      // Positionner le curseur après le render
+      requestAnimationFrame(() => {
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+        textarea.focus();
+      });
     } else {
       setText((prev) => prev + letter);
     }
@@ -349,7 +353,7 @@ function App() {
       </header>
 
       {/* ZONE DE TEXTE PRINCIPALE */}
-      <main className="app-main" style={{ position: 'relative' }}>
+      <main className="app-main">
         <textarea
           ref={textareaRef}
           value={text}
@@ -358,20 +362,27 @@ function App() {
           placeholder="Écrivez votre texte en Kibosy... Cliquez sur le crabe 🦀 pour utiliser le clavier virtuel !"
           spellCheck={false}
         />
-        
-        {/* 🦀 CLAVIER KIBOSY EN OVERLAY */}
-        {showKeyboard && (
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 1000,
-          }}>
-            <KibosyKeyboard onInsert={handleInsertFromKeyboard} />
-          </div>
-        )}
       </main>
+
+      {/* 🦀 CLAVIER KIBOSY DRAGGABLE - hors du main pour éviter overflow:hidden */}
+      {showKeyboard && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          pointerEvents: 'none',
+          zIndex: 1000
+        }}>
+          <div style={{ pointerEvents: 'auto' }}>
+            <KibosyKeyboard
+              onInsert={handleInsertFromKeyboard}
+              onClose={() => setShowKeyboard(false)}
+            />
+          </div>
+        </div>
+      )}
 
       {/* FOOTER STATISTIQUES */}
       <footer className="app-footer">
