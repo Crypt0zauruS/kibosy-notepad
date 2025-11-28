@@ -1,21 +1,35 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import Draggable from "react-draggable";
-import { useTheme } from "@/providers/ThemeProvider";
 
-const CRAB_COLORS = {
+const COLORS = {
+  // Palette moderne et élégante
   primary: "#ef4444",
-  secondary: "#f97316",
-  accent: "#fbbf24",
-  glow: "#fca5a5",
+  primaryLight: "#fca5a5",
+  dark: {
+    bg: "rgba(15, 23, 42, 0.95)",
+    bgSecondary: "rgba(30, 41, 59, 0.8)",
+    border: "rgba(71, 85, 105, 0.4)",
+    text: "#f1f5f9",
+    textMuted: "#94a3b8",
+  },
+  light: {
+    bg: "rgba(255, 255, 255, 0.95)",
+    bgSecondary: "rgba(248, 250, 252, 0.9)",
+    border: "rgba(203, 213, 225, 0.6)",
+    text: "#0f172a",
+    textMuted: "#64748b",
+  },
 };
 
+// ✅ ALPHABET OFFICIEL PVAP 2024-2025 - 28 LETTRES
 const ACCENTED_GROUPS = {
   B: ["Ɓ", "ɓ"],
-  D: ["Ɖ", "ɗ"],
+  D: ["Ɖ", "ɖ", "Ɗ", "ɗ"],
   J: ["Ĵ", "ĵ"],
-  N: ["Ń", "ń"],
-  O: ["Ô", "ô"],
-  S: ["Ŝ", "ŝ"],
+  L: ["LJ", "lj"],
+  N: ["Ń", "ń", "Ñ", "ñ"],
+  O: ["Ô", "ô", "Ó", "ó"],
+  S: ["Ŝ", "ŝ", "Š", "š"],
   Z: ["Ẑ", "ẑ"],
 } as const;
 
@@ -24,15 +38,21 @@ interface KibosyKeyboardProps {
   onClose: () => void;
 }
 
-export const KibosyKeyboard: React.FC<KibosyKeyboardProps> = ({ onInsert, onClose }) => {
-  const { isDark } = useTheme();
-  const [size, setSize] = useState({ width: 480, height: 400 });
+const KibosyKeyboard = ({ onInsert, onClose }: KibosyKeyboardProps) => {
+  const [isDark] = useState(() => {
+    const root = document.querySelector(".app-container");
+    return root?.classList.contains("dark") ?? true;
+  });
+
+  const [size, setSize] = useState({ width: 480, height: 480 });
   const [isResizing, setIsResizing] = useState(false);
+
+  const theme = isDark ? COLORS.dark : COLORS.light;
 
   // Position initiale centrée
   const [position] = useState(() => ({
     x: (window.innerWidth - 480) / 2,
-    y: Math.max(50, (window.innerHeight - 400) / 2 - 50)
+    y: Math.max(60, (window.innerHeight - 450) / 2 - 40),
   }));
 
   const handleLetterClick = useCallback(
@@ -44,149 +64,261 @@ export const KibosyKeyboard: React.FC<KibosyKeyboardProps> = ({ onInsert, onClos
     [onInsert]
   );
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      setIsResizing(true);
 
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startWidth = size.width;
-    const startHeight = size.height;
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startWidth = size.width;
+      const startHeight = size.height;
 
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const newWidth = Math.max(300, startWidth + (moveEvent.clientX - startX));
-      const newHeight = Math.max(250, startHeight + (moveEvent.clientY - startY));
-      setSize({ width: newWidth, height: newHeight });
-    };
+      const handleMouseMove = (moveEvent: MouseEvent) => {
+        const newWidth = Math.max(
+          400,
+          Math.min(800, startWidth + (moveEvent.clientX - startX))
+        );
+        const newHeight = Math.max(
+          350,
+          Math.min(700, startHeight + (moveEvent.clientY - startY))
+        );
+        setSize({ width: newWidth, height: newHeight });
+      };
 
-    const handleMouseUp = () => {
-      setIsResizing(false);
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
+      const handleMouseUp = () => {
+        setIsResizing(false);
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
 
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-  }, [size]);
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    },
+    [size]
+  );
 
   return (
     <Draggable handle=".drag-handle" defaultPosition={position} bounds="body">
       <div
-        className="kibosy-keyboard"
         style={{
+          position: "absolute",
           width: `${size.width}px`,
           height: `${size.height}px`,
-          minWidth: "300px",
-          minHeight: "250px",
+          minWidth: "400px",
+          minHeight: "350px",
           userSelect: isResizing ? "none" : "auto",
+          zIndex: 1000,
         }}
       >
         <div
-          className="rounded-2xl border-2 shadow-2xl h-full flex flex-col"
           style={{
-            background: isDark
-              ? "linear-gradient(135deg, rgba(15,23,42,0.98), rgba(30,41,59,0.98))"
-              : "linear-gradient(135deg, rgba(255,255,255,0.98), rgba(248,250,252,0.98))",
-            borderColor: CRAB_COLORS.glow,
-            backdropFilter: "blur(25px)",
-            boxShadow: `0 0 50px ${CRAB_COLORS.primary}30`,
+            width: "100%",
+            height: "100%",
+            background: theme.bg,
+            borderRadius: "12px",
+            border: `1px solid ${theme.border}`,
+            boxShadow: isDark
+              ? "0 20px 60px rgba(0, 0, 0, 0.5), 0 0 1px rgba(239, 68, 68, 0.2)"
+              : "0 20px 60px rgba(0, 0, 0, 0.15), 0 0 1px rgba(239, 68, 68, 0.1)",
+            backdropFilter: "blur(20px)",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
           }}
         >
-          {/* Header draggable */}
+          {/* HEADER MODERNE */}
           <div
-            className="drag-handle flex items-center justify-between px-5 py-4 border-b"
+            className="drag-handle"
             style={{
-              borderColor: CRAB_COLORS.glow,
-              cursor: 'grab',
-              background: isDark
-                ? 'rgba(255,255,255,0.02)'
-                : 'rgba(0,0,0,0.02)'
+              padding: "12px 16px",
+              borderBottom: `1px solid ${theme.border}`,
+              cursor: "grab",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: theme.bgSecondary,
+              userSelect: "none",
             }}
             onMouseDown={(e) => {
-              if (e.currentTarget === e.target || e.currentTarget.contains(e.target as Node)) {
-                (e.currentTarget as HTMLElement).style.cursor = 'grabbing';
+              if (
+                e.currentTarget === e.target ||
+                e.currentTarget.contains(e.target as Node)
+              ) {
+                (e.currentTarget as HTMLElement).style.cursor = "grabbing";
               }
             }}
             onMouseUp={(e) => {
-              (e.currentTarget as HTMLElement).style.cursor = 'grab';
+              (e.currentTarget as HTMLElement).style.cursor = "grab";
             }}
           >
-            <div className="flex items-center gap-3">
-              <span style={{ fontSize: "24px" }}>🦀</span>
-              <h3
-                className="font-bold text-lg select-none"
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "18px" }}>🦀</span>
+              <span
                 style={{
-                  color: isDark ? "#ffffff" : "#000000",
-                  letterSpacing: '0.02em'
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: theme.text,
+                  letterSpacing: "0.3px",
                 }}
               >
-                Caractères Kibosy
-              </h3>
+                Alphabet Kibosy
+              </span>
+              <span
+                style={{
+                  fontSize: "10px",
+                  fontWeight: "500",
+                  color: theme.textMuted,
+                  background: isDark
+                    ? "rgba(239, 68, 68, 0.1)"
+                    : "rgba(239, 68, 68, 0.08)",
+                  padding: "2px 6px",
+                  borderRadius: "4px",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                PVAP 2024-2025
+              </span>
             </div>
+
+            {/* Bouton fermer élégant */}
             <button
               onClick={onClose}
-              className="hover:bg-red-500/20 rounded-lg transition-all hover:scale-110 active:scale-95"
               style={{
-                color: CRAB_COLORS.primary,
-                fontSize: '24px',
-                width: '36px',
-                height: '36px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                fontWeight: 'bold'
+                width: "28px",
+                height: "28px",
+                borderRadius: "6px",
+                border: "none",
+                background: isDark
+                  ? "rgba(255, 255, 255, 0.05)"
+                  : "rgba(0, 0, 0, 0.04)",
+                color: theme.textMuted,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "16px",
+                fontWeight: "500",
+                transition: "all 0.15s ease",
               }}
-              title="Fermer le clavier"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)";
+                e.currentTarget.style.color = COLORS.primary;
+                e.currentTarget.style.transform = "scale(1.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = isDark
+                  ? "rgba(255, 255, 255, 0.05)"
+                  : "rgba(0, 0, 0, 0.04)";
+                e.currentTarget.style.color = theme.textMuted;
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+              title="Fermer"
             >
-              ✕
+              ×
             </button>
           </div>
 
-          {/* Contenu scrollable */}
+          {/* CONTENU SCROLLABLE */}
           <div
-            className="flex-1 overflow-y-auto p-5"
-            style={{ cursor: 'default' }}
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              padding: "16px",
+              overflowX: "hidden",
+            }}
           >
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+                gap: "12px",
+              }}
+            >
               {Object.entries(ACCENTED_GROUPS).map(([baseLetter, variants]) => (
                 <div
                   key={baseLetter}
-                  className="p-3 rounded-lg"
                   style={{
-                    background: isDark
-                      ? "rgba(255,255,255,0.05)"
-                      : "rgba(0,0,0,0.03)",
-                    border: `1px solid ${
-                      isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
-                    }`,
+                    background: theme.bgSecondary,
+                    borderRadius: "8px",
+                    border: `1px solid ${theme.border}`,
+                    padding: "10px",
                   }}
                 >
+                  {/* Label de la lettre de base */}
                   <div
-                    className="text-center mb-2 font-bold text-sm opacity-60 select-none"
                     style={{
-                      color: isDark ? "#ffffff" : "#000000",
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      color: theme.textMuted,
+                      marginBottom: "8px",
+                      textAlign: "center",
+                      letterSpacing: "0.5px",
                     }}
                   >
                     {baseLetter}
                   </div>
-                  <div className="flex flex-wrap justify-center">
+
+                  {/* Boutons des variantes */}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "6px",
+                      justifyContent: "center",
+                    }}
+                  >
                     {variants.map((char) => (
                       <button
                         key={char}
                         onClick={(e) => handleLetterClick(e, char)}
-                        className="w-16 h-16 rounded-lg font-bold transition-all hover:scale-110 active:scale-95"
                         style={{
+                          minWidth: char.length > 1 ? "44px" : "38px",
+                          height: "38px",
+                          borderRadius: "6px",
+                          border: `1px solid ${theme.border}`,
                           background: isDark
-                            ? `linear-gradient(135deg, ${CRAB_COLORS.primary}30, ${CRAB_COLORS.secondary}20)`
-                            : `linear-gradient(135deg, ${CRAB_COLORS.primary}20, ${CRAB_COLORS.secondary}15)`,
-                          color: isDark ? "#ffffff" : "#000000",
-                          border: `1px solid ${CRAB_COLORS.glow}`,
-                          boxShadow: `0 2px 8px ${CRAB_COLORS.primary}20`,
-                          fontSize: '28px',
-                          margin: '4px',
-                          cursor: 'pointer',
-                          fontFamily: 'Menlo, Consolas, monospace'
+                            ? "linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(249, 115, 22, 0.05))"
+                            : "linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(249, 115, 22, 0.03))",
+                          color: theme.text,
+                          fontSize: char.length > 1 ? "15px" : "18px",
+                          fontWeight: "500",
+                          cursor: "pointer",
+                          transition: "all 0.15s ease",
+                          fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: "0",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform =
+                            "scale(1.08) translateY(-1px)";
+                          e.currentTarget.style.borderColor = COLORS.primary;
+                          e.currentTarget.style.background = isDark
+                            ? "linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(249, 115, 22, 0.1))"
+                            : "linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(249, 115, 22, 0.08))";
+                          e.currentTarget.style.boxShadow = `0 4px 12px ${
+                            isDark
+                              ? "rgba(239, 68, 68, 0.2)"
+                              : "rgba(239, 68, 68, 0.15)"
+                          }`;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform =
+                            "scale(1) translateY(0)";
+                          e.currentTarget.style.borderColor = theme.border;
+                          e.currentTarget.style.background = isDark
+                            ? "linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(249, 115, 22, 0.05))"
+                            : "linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(249, 115, 22, 0.03))";
+                          e.currentTarget.style.boxShadow = "none";
+                        }}
+                        onMouseDown={(e) => {
+                          e.currentTarget.style.transform = "scale(0.95)";
+                        }}
+                        onMouseUp={(e) => {
+                          e.currentTarget.style.transform =
+                            "scale(1.08) translateY(-1px)";
                         }}
                         title={`Insérer ${char}`}
                       >
@@ -199,17 +331,56 @@ export const KibosyKeyboard: React.FC<KibosyKeyboardProps> = ({ onInsert, onClos
             </div>
           </div>
 
-          {/* Resize handle */}
+          {/* RESIZE HANDLE DISCRET */}
           <div
-            className="absolute bottom-0 right-0 w-8 h-8 cursor-nwse-resize transition-opacity hover:opacity-100"
             onMouseDown={handleMouseDown}
             style={{
-              background: `linear-gradient(135deg, transparent 45%, ${CRAB_COLORS.primary}60 50%, ${CRAB_COLORS.glow}90 55%)`,
-              borderBottomRightRadius: "1rem",
-              opacity: 0.6
+              position: "absolute",
+              bottom: 0,
+              right: 0,
+              width: "32px",
+              height: "32px",
+              cursor: "nwse-resize",
+              borderBottomRightRadius: "12px",
+              background: `linear-gradient(135deg, transparent 45%, ${
+                theme.border
+              } 50%, ${
+                isDark ? "rgba(239, 68, 68, 0.3)" : "rgba(239, 68, 68, 0.2)"
+              } 55%)`,
+              opacity: 0.4,
+              transition: "opacity 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "0.7";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "0.4";
             }}
             title="Redimensionner"
           />
+
+          {/* Scrollbar custom */}
+          <style>{`
+            div::-webkit-scrollbar {
+              width: 6px;
+            }
+            div::-webkit-scrollbar-track {
+              background: transparent;
+            }
+            div::-webkit-scrollbar-thumb {
+              background: ${
+                isDark ? "rgba(148, 163, 184, 0.3)" : "rgba(100, 116, 139, 0.2)"
+              };
+              border-radius: 3px;
+            }
+            div::-webkit-scrollbar-thumb:hover {
+              background: ${
+                isDark
+                  ? "rgba(148, 163, 184, 0.5)"
+                  : "rgba(100, 116, 139, 0.35)"
+              };
+            }
+          `}</style>
         </div>
       </div>
     </Draggable>

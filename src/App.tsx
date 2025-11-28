@@ -5,8 +5,16 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { open, save } from "@tauri-apps/plugin-dialog";
-import { writeTextFile, readTextFile, BaseDirectory, exists, mkdir } from "@tauri-apps/plugin-fs";
+import {
+  writeTextFile,
+  readTextFile,
+  BaseDirectory,
+  exists,
+  mkdir,
+} from "@tauri-apps/plugin-fs";
 import KibosyKeyboard from "./components/KibosyKeyboard";
+import LanguageSelector from "./components/LanguageSelector";
+import { useI18n } from "./lib/i18n";
 import "./App.css";
 
 // ========================================
@@ -23,6 +31,11 @@ import "./App.css";
 // ========================================
 
 function App() {
+  // ========================================
+  // 🌍 I18N
+  // ========================================
+  const { t, language, setLanguage } = useI18n();
+
   // ========================================
   // 🔧 STATES
   // ========================================
@@ -51,19 +64,24 @@ function App() {
   useEffect(() => {
     const autosave = async () => {
       if (text === lastSavedTextRef.current) return;
-      
+
       try {
         // Créer le dossier Kibosy s'il n'existe pas
-        const dirExists = await exists("Kibosy", { baseDir: BaseDirectory.Document });
+        const dirExists = await exists("Kibosy", {
+          baseDir: BaseDirectory.Document,
+        });
         if (!dirExists) {
-          await mkdir("Kibosy", { baseDir: BaseDirectory.Document, recursive: true });
+          await mkdir("Kibosy", {
+            baseDir: BaseDirectory.Document,
+            recursive: true,
+          });
         }
 
         // Sauvegarder
         await writeTextFile("Kibosy/autosave.kibosy", text, {
           baseDir: BaseDirectory.Document,
         });
-        
+
         lastSavedTextRef.current = text;
         console.log("✅ Autosave réussi");
       } catch (error) {
@@ -120,17 +138,15 @@ function App() {
 
   const handleNew = useCallback(() => {
     if (hasUnsavedChanges) {
-      const confirmed = window.confirm(
-        "Vous avez des modifications non sauvegardées. Continuer ?"
-      );
+      const confirmed = window.confirm(t("dialogs.unsavedChanges"));
       if (!confirmed) return;
     }
-    
+
     setText("");
     setCurrentFile(null);
     lastSavedTextRef.current = "";
     setHasUnsavedChanges(false);
-  }, [hasUnsavedChanges]);
+  }, [hasUnsavedChanges, t]);
 
   const handleOpen = useCallback(async () => {
     try {
@@ -153,9 +169,9 @@ function App() {
       }
     } catch (error) {
       console.error("Erreur ouverture:", error);
-      alert("Erreur lors de l'ouverture du fichier");
+      alert(t("dialogs.error.open"));
     }
-  }, []);
+  }, [t]);
 
   const handleSave = useCallback(async () => {
     try {
@@ -171,9 +187,9 @@ function App() {
       }
     } catch (error) {
       console.error("Erreur sauvegarde:", error);
-      alert("Erreur lors de la sauvegarde");
+      alert(t("dialogs.error.save"));
     }
-  }, [currentFile, text]);
+  }, [currentFile, text, t]);
 
   const handleSaveAs = useCallback(async () => {
     try {
@@ -192,14 +208,14 @@ function App() {
         setCurrentFile(filePath);
         lastSavedTextRef.current = text;
         setHasUnsavedChanges(false);
-        
+
         console.log("✅ Fichier enregistré sous:", filePath);
       }
     } catch (error) {
       console.error("Erreur enregistrer sous:", error);
-      alert("Erreur lors de l'enregistrement");
+      alert(t("dialogs.error.save"));
     }
-  }, [text]);
+  }, [text, t]);
 
   const handleExportTxt = useCallback(async () => {
     try {
@@ -219,9 +235,9 @@ function App() {
       }
     } catch (error) {
       console.error("Erreur export TXT:", error);
-      alert("Erreur lors de l'export");
+      alert(t("dialogs.error.export"));
     }
-  }, [text]);
+  }, [text, t]);
 
   // ========================================
   // ⌨️ INSERTION DEPUIS CLAVIER
@@ -308,23 +324,25 @@ function App() {
       {/* HEADER */}
       <header className="app-header">
         <div className="header-left">
-          <span className="app-title">🦀 Kibosy Notepad</span>
-          <button 
-            onClick={() => setShowKeyboard(!showKeyboard)} 
+          <span className="app-title">🦀 {t("app.title")}</span>
+          <button
+            onClick={() => setShowKeyboard(!showKeyboard)}
             className="crab-toggle-btn"
-            title="Ouvrir/Fermer le clavier Kibosy"
+            title={t("keyboard.toggle")}
             style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '32px',
-              cursor: 'pointer',
-              marginLeft: '10px',
-              padding: '0',
-              lineHeight: '1',
-              transition: 'transform 0.2s',
+              background: "none",
+              border: "none",
+              fontSize: "32px",
+              cursor: "pointer",
+              marginLeft: "10px",
+              padding: "0",
+              lineHeight: "1",
+              transition: "transform 0.2s",
             }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.transform = "scale(1.1)")
+            }
+            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
           >
             🦀
           </button>
@@ -335,18 +353,42 @@ function App() {
             </span>
           )}
         </div>
-        
+
         <div className="header-controls">
-          <button onClick={handleNew} className="header-btn" title="Nouveau (Ctrl+N)">
-            📄 Nouveau
+          <button
+            onClick={handleNew}
+            className="header-btn"
+            title={t("shortcuts.new")}
+          >
+            📄 {t("menu.new")}
           </button>
-          <button onClick={handleOpen} className="header-btn" title="Ouvrir (Ctrl+O)">
-            📂 Ouvrir
+          <button
+            onClick={handleOpen}
+            className="header-btn"
+            title={t("shortcuts.open")}
+          >
+            📂 {t("menu.open")}
           </button>
-          <button onClick={handleSave} className="header-btn" title="Enregistrer (Ctrl+S)">
-            💾 Enregistrer
+          <button
+            onClick={handleSave}
+            className="header-btn"
+            title={t("shortcuts.save")}
+          >
+            💾 {t("menu.save")}
           </button>
-          <button onClick={toggleTheme} className="header-btn" title="Changer le thème">
+
+          {/* SÉLECTEUR DE LANGUE */}
+          <LanguageSelector
+            currentLanguage={language}
+            onLanguageChange={setLanguage}
+            isDark={isDark}
+          />
+
+          <button
+            onClick={toggleTheme}
+            className="header-btn"
+            title={t("theme.toggle")}
+          >
             {isDark ? "☀️" : "🌙"}
           </button>
         </div>
@@ -359,23 +401,25 @@ function App() {
           value={text}
           onChange={(e) => setText(e.target.value)}
           className="main-textarea"
-          placeholder="Écrivez votre texte en Kibosy... Cliquez sur le crabe 🦀 pour utiliser le clavier virtuel !"
+          placeholder={t("editor.placeholder")}
           spellCheck={false}
         />
       </main>
 
       {/* 🦀 CLAVIER KIBOSY DRAGGABLE - hors du main pour éviter overflow:hidden */}
       {showKeyboard && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          pointerEvents: 'none',
-          zIndex: 1000
-        }}>
-          <div style={{ pointerEvents: 'auto' }}>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            pointerEvents: "none",
+            zIndex: 1000,
+          }}
+        >
+          <div style={{ pointerEvents: "auto" }}>
             <KibosyKeyboard
               onInsert={handleInsertFromKeyboard}
               onClose={() => setShowKeyboard(false)}
@@ -387,15 +431,23 @@ function App() {
       {/* FOOTER STATISTIQUES */}
       <footer className="app-footer">
         <div className="stats">
-          <span>📝 {stats.characters} caractères</span>
+          <span>
+            📝 {stats.characters} {t("stats.characters")}
+          </span>
           <span>•</span>
-          <span>🔤 {stats.words} mots</span>
+          <span>
+            🔤 {stats.words} {t("stats.words")}
+          </span>
           <span>•</span>
-          <span>📄 {stats.lines} lignes</span>
+          <span>
+            📄 {stats.lines} {t("stats.lines")}
+          </span>
         </div>
         <div className="footer-info">
-          {hasUnsavedChanges && <span className="unsaved-indicator">● Modifications non sauvegardées</span>}
-          <span className="autosave-info">💾 Sauvegarde automatique activée</span>
+          {hasUnsavedChanges && (
+            <span className="unsaved-indicator">● {t("status.unsaved")}</span>
+          )}
+          <span className="autosave-info">💾 {t("status.autosave")}</span>
         </div>
       </footer>
     </div>

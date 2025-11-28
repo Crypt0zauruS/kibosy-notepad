@@ -1,0 +1,44 @@
+{
+  "app": {
+    "title": "Kibosy Notepad",
+    "subtitle": "Official notepad for the Kibosy language of Mayotte"
+  },
+  "menu": {
+    "new": "New",
+    "open": "Open",
+    "save": "Save",
+    "saveAs": "Save As",
+    "export": "Export TXT"
+  },
+  "editor": {
+    "placeholder": "Write your text in Kibosy... Click on the crab 🦀 to use the virtual keyboard!"
+  },
+  "keyboard": {
+    "title": "Kibosy Characters",
+    "close": "Close keyboard",
+    "insert": "Insert",
+    "resize": "Resize"
+  },
+  "stats": {
+    "characters": "characters",
+    "words": "words",
+    "lines": "lines"
+  },
+  "status": {
+    "unsaved": "Unsaved changes",
+    "autosave": "Auto-save enabled"
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light theme",
+    "dark": "Dark theme"
+  },
+  "dialogs": {
+    "unsavedChanges": "You have unsaved changes. Continue?",
+    "error": {
+      "open": "Error opening file",
+      "save": "Error saving file",
+      "export": "Error exporting file"
+    }
+  }
+}

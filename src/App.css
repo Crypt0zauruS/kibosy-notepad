@@ -161,8 +161,9 @@
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
-.main-textarea::placeholder {
-  opacity: 0.5;
+.light .main-textarea::placeholder {
+  color: #64748b;
+  opacity: 1;
 }
 
 /* ========================================
@@ -303,4 +304,11 @@
 /* Amélioration du curseur sur les boutons */
 .kibosy-keyboard button {
   cursor: pointer !important;
+}
+
+/* Responsive pour le sélecteur de langue */
+@media (max-width: 768px) {
+  .language-selector button span:last-child {
+    display: none;
+  }
 }

@@ -13,9 +13,9 @@
   /* Thème clair */
   --bg-light: #ffffff;
   --bg-light-secondary: #f3f4f6;
-  --text-light: #111827;
-  --text-light-muted: #6b7280;
-  --border-light: #e5e7eb;
+  --text-light: #0f172a;
+  --text-light-muted: #475569;
+  --border-light: #cbd5e1; 
 
   /* Thème sombre */
   --bg-dark: #0f172a;

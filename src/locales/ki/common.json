@@ -1,0 +1,44 @@
+{
+  "app": {
+    "title": "Kibosy Notepad",
+    "subtitle": "Blokinoti ofisieli wa Shimaore sha Maore"
+  },
+  "menu": {
+    "new": "Mpva",
+    "open": "Fungua",
+    "save": "Hifadhi",
+    "saveAs": "Hifadhi kama",
+    "export": "Toa TXT"
+  },
+  "editor": {
+    "placeholder": "Andzisha maelezo yaho ya Kibosy... Bunyisa kaa 🦀 ukaringidzire klavie virtueli!"
+  },
+  "keyboard": {
+    "title": "Herufi za Kibosy",
+    "close": "Funga klavie",
+    "insert": "Ingiza",
+    "resize": "Badilisha ukubwa"
+  },
+  "stats": {
+    "characters": "herufi",
+    "words": "maneno",
+    "lines": "mistari"
+  },
+  "status": {
+    "unsaved": "Mabadilisho yasiyo hifadhiwa",
+    "autosave": "Hifadhi ya moja kwa moja imefunguliwa"
+  },
+  "theme": {
+    "toggle": "Badilisha mandhari",
+    "light": "Mandhari ya mwanga",
+    "dark": "Mandhari ya giza"
+  },
+  "dialogs": {
+    "unsavedChanges": "Una mabadilisho yasiyo hifadhiwa. Endelea?",
+    "error": {
+      "open": "Kosa la kufungua faili",
+      "save": "Kosa la kuhifadhi",
+      "export": "Kosa la kutoa"
+    }
+  }
+}

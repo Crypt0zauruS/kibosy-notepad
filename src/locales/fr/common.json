@@ -1,0 +1,44 @@
+{
+  "app": {
+    "title": "Kibosy Notepad",
+    "subtitle": "Bloc-notes officiel pour la langue Kibosy de Mayotte"
+  },
+  "menu": {
+    "new": "Nouveau",
+    "open": "Ouvrir",
+    "save": "Enregistrer",
+    "saveAs": "Enregistrer sous",
+    "export": "Exporter TXT"
+  },
+  "editor": {
+    "placeholder": "Écrivez votre texte en Kibosy... Cliquez sur le crabe 🦀 pour utiliser le clavier virtuel !"
+  },
+  "keyboard": {
+    "title": "Caractères Kibosy",
+    "close": "Fermer le clavier",
+    "insert": "Insérer",
+    "resize": "Redimensionner"
+  },
+  "stats": {
+    "characters": "caractères",
+    "words": "mots",
+    "lines": "lignes"
+  },
+  "status": {
+    "unsaved": "Modifications non sauvegardées",
+    "autosave": "Sauvegarde automatique activée"
+  },
+  "theme": {
+    "toggle": "Basculer le thème",
+    "light": "Thème clair",
+    "dark": "Thème sombre"
+  },
+  "dialogs": {
+    "unsavedChanges": "Vous avez des modifications non sauvegardées. Continuer ?",
+    "error": {
+      "open": "Erreur lors de l'ouverture du fichier",
+      "save": "Erreur lors de la sauvegarde",
+      "export": "Erreur lors de l'exportation"
+    }
+  }
+}
