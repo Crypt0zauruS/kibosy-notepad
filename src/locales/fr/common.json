@@ -17,6 +17,7 @@
     "title": "Caractères Kibosy",
     "close": "Fermer le clavier",
     "insert": "Insérer",
+    "toggle": "Ouvrir/Fermer le clavier Kibosy",
     "resize": "Redimensionner"
   },
   "stats": {
@@ -35,10 +36,18 @@
   },
   "dialogs": {
     "unsavedChanges": "Vous avez des modifications non sauvegardées. Continuer ?",
+    "unsavedTitle": "Modifications non sauvegardées",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
     "error": {
       "open": "Erreur lors de l'ouverture du fichier",
       "save": "Erreur lors de la sauvegarde",
       "export": "Erreur lors de l'exportation"
     }
+  },
+  "shortcuts": {
+    "new": "Nouveau (Ctrl+N)",
+    "open": "Ouvrir (Ctrl+O)",
+    "save": "Enregistrer (Ctrl+S)"
   }
 }

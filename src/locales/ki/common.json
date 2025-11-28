@@ -16,6 +16,7 @@
   "keyboard": {
     "title": "Herufi za Kibosy",
     "close": "Funga klavie",
+    "toggle": "Fungua/Funga klavie ya Kibosy",
     "insert": "Ingiza",
     "resize": "Badilisha ukubwa"
   },
@@ -35,10 +36,18 @@
   },
   "dialogs": {
     "unsavedChanges": "Una mabadilisho yasiyo hifadhiwa. Endelea?",
+    "unsavedTitle": "Mabadilisho yasiyo hifadhiwa",
+    "confirm": "Endelea",
+    "cancel": "Hapana",
     "error": {
       "open": "Kosa la kufungua faili",
       "save": "Kosa la kuhifadhi",
       "export": "Kosa la kutoa"
     }
+  },
+  "shortcuts": {
+    "new": "Mpva (Ctrl+N)",
+    "open": "Fungua (Ctrl+O)",
+    "save": "Hifadhi (Ctrl+S)"
   }
 }

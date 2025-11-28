@@ -17,6 +17,7 @@
     "title": "Kibosy Characters",
     "close": "Close keyboard",
     "insert": "Insert",
+    "toggle": "Toggle Kibosy keyboard",
     "resize": "Resize"
   },
   "stats": {
@@ -35,10 +36,18 @@
   },
   "dialogs": {
     "unsavedChanges": "You have unsaved changes. Continue?",
+    "unsavedTitle": "Unsaved changes",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
     "error": {
       "open": "Error opening file",
       "save": "Error saving file",
       "export": "Error exporting file"
     }
+  },
+  "shortcuts": {
+    "new": "New (Ctrl+N)",
+    "open": "Open (Ctrl+O)",
+    "save": "Save (Ctrl+S)"
   }
 }

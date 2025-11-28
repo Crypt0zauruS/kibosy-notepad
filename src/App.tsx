@@ -14,6 +14,7 @@ import {
 } from "@tauri-apps/plugin-fs";
 import KibosyKeyboard from "./components/KibosyKeyboard";
 import LanguageSelector from "./components/LanguageSelector";
+import ConfirmDialog from "./components/ConfirmDialog";
 import { useI18n } from "./lib/i18n";
 import "./App.css";
 
@@ -44,6 +45,12 @@ function App() {
   const [isDark, setIsDark] = useState(true);
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Dialog de confirmation
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"new" | "open" | null>(
+    null
+  );
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const autosaveTimerRef = useRef<number>();
@@ -133,22 +140,56 @@ function App() {
   }, [text]);
 
   // ========================================
+  // 🚪 PRÉVENTION FERMETURE FENÊTRE
+  // ========================================
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = ""; // Requis pour Chrome
+        return "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [hasUnsavedChanges]);
+
+  // ========================================
   // 🗂️ GESTION FICHIERS
   // ========================================
 
   const handleNew = useCallback(() => {
     if (hasUnsavedChanges) {
-      const confirmed = window.confirm(t("dialogs.unsavedChanges"));
-      if (!confirmed) return;
+      setPendingAction("new");
+      setShowConfirmDialog(true);
+      return;
     }
 
+    // Si pas de changements, exécuter directement
     setText("");
     setCurrentFile(null);
     lastSavedTextRef.current = "";
     setHasUnsavedChanges(false);
-  }, [hasUnsavedChanges, t]);
+  }, [hasUnsavedChanges]);
 
   const handleOpen = useCallback(async () => {
+    // Vérifier s'il y a des modifications non sauvegardées
+    if (hasUnsavedChanges) {
+      setPendingAction("open");
+      setShowConfirmDialog(true);
+      return;
+    }
+
+    // Si pas de changements, exécuter directement
+    await executeOpen();
+  }, [hasUnsavedChanges]);
+
+  // Fonction pour exécuter l'ouverture
+  const executeOpen = useCallback(async () => {
     try {
       const selected = await open({
         multiple: false,
@@ -173,23 +214,27 @@ function App() {
     }
   }, [t]);
 
-  const handleSave = useCallback(async () => {
-    try {
-      if (currentFile) {
-        // Sauvegarder dans le fichier existant
-        await writeTextFile(currentFile, text);
-        lastSavedTextRef.current = text;
-        setHasUnsavedChanges(false);
-        console.log("✅ Fichier sauvegardé");
-      } else {
-        // Pas de fichier courant → Enregistrer sous
-        handleSaveAs();
-      }
-    } catch (error) {
-      console.error("Erreur sauvegarde:", error);
-      alert(t("dialogs.error.save"));
+  // Callback pour confirmer l'action
+  const handleConfirmDialog = useCallback(() => {
+    setShowConfirmDialog(false);
+
+    if (pendingAction === "new") {
+      setText("");
+      setCurrentFile(null);
+      lastSavedTextRef.current = "";
+      setHasUnsavedChanges(false);
+    } else if (pendingAction === "open") {
+      executeOpen();
     }
-  }, [currentFile, text, t]);
+
+    setPendingAction(null);
+  }, [pendingAction, executeOpen]);
+
+  // Callback pour annuler l'action
+  const handleCancelDialog = useCallback(() => {
+    setShowConfirmDialog(false);
+    setPendingAction(null);
+  }, []);
 
   const handleSaveAs = useCallback(async () => {
     try {
@@ -216,6 +261,24 @@ function App() {
       alert(t("dialogs.error.save"));
     }
   }, [text, t]);
+
+  const handleSave = useCallback(async () => {
+    try {
+      if (currentFile) {
+        // Sauvegarder dans le fichier existant
+        await writeTextFile(currentFile, text);
+        lastSavedTextRef.current = text;
+        setHasUnsavedChanges(false);
+        console.log("✅ Fichier sauvegardé");
+      } else {
+        // Pas de fichier courant → Enregistrer sous
+        handleSaveAs();
+      }
+    } catch (error) {
+      console.error("Erreur sauvegarde:", error);
+      alert(t("dialogs.error.save"));
+    }
+  }, [currentFile, text, t, handleSaveAs]);
 
   const handleExportTxt = useCallback(async () => {
     try {
@@ -450,6 +513,18 @@ function App() {
           <span className="autosave-info">💾 {t("status.autosave")}</span>
         </div>
       </footer>
+
+      {/* DIALOG DE CONFIRMATION */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        title={t("dialogs.unsavedTitle")}
+        message={t("dialogs.unsavedChanges")}
+        confirmText={t("dialogs.confirm")}
+        cancelText={t("dialogs.cancel")}
+        onConfirm={handleConfirmDialog}
+        onCancel={handleCancelDialog}
+        isDark={isDark}
+      />
     </div>
   );
 }
