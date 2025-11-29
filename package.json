@@ -1,7 +1,7 @@
 {
   "name": "kibosy-notepad",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "Bloc-notes officiel pour la langue Kibosy de Mayotte avec clavier virtuel intégré",
   "author": "Marovoanio - Association pour la préservation du Kibosy",
@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "tauri:universal": "npm run build && tauri build --target universal-apple-darwin"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",

@@ -228,7 +228,7 @@ const KibosyKeyboard = ({ onInsert, onClose }: KibosyKeyboardProps) => {
                 letterSpacing: '0.5px',
               }}
             >
-              ALPHABET (28 lettres)
+              ALPHABET
             </h4>
             
             <div style={{ 

@@ -25,9 +25,9 @@ The licensor cannot revoke these freedoms as long as you follow the license term
 
 ## Attribution
 
-This work, "Deluge Torrent Manager", is an original creation by Crypt0zauruS. To use this work, you must include the following attribution:
+This work, "Kibosy Notepad", is an original creation by Crypt0zauruS. To use this work, you must include the following attribution:
 
-"Based on 'Deluge Torrent Manager' by Crypt0zauruS, used under CC BY 4.0. [Include a link to the original project if available]"
+"Based on 'Kibosy Notepad' by Crypt0zauruS, used under CC BY 4.0. [Include a link to the original project if available]"
 
 ## Disclaimer
 
@@ -64,9 +64,9 @@ L'Offrant ne peut retirer les autorisations concédées par la licence tant que 
 
 ## Attribution
 
-Ce travail, "Deluge Torrent Manager", est une création originale de Crypt0zauruS. Pour utiliser ce travail, vous devez inclure l'attribution suivante :
+Ce travail, "Kibosy Notepad", est une création originale de Crypt0zauruS. Pour utiliser ce travail, vous devez inclure l'attribution suivante :
 
-"Basé sur 'Deluge Torrent Manager' par Crypt0zauruS, utilisé sous CC BY 4.0. [Incluez un lien vers le projet original si disponible]"
+"Basé sur 'Kibosy Notepad' par Crypt0zauruS, utilisé sous CC BY 4.0. [Incluez un lien vers le projet original si disponible]"
 
 ## Avertissement
 

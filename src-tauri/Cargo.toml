@@ -1,6 +1,6 @@
 [package]
 name = "kibosy-notepad"
-version = "1.0.0"
+version = "0.1.0"
 description = "Bloc-notes officiel pour la langue Kibosy de Mayotte"
 authors = ["Marovoanio"]
 license = "MIT"
