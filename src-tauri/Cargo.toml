@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "Bloc-notes officiel pour la langue Kibosy de Mayotte"
 authors = ["Marovoanio"]
 license = "MIT"
-repository = "https://github.com/marovoanio/kibosy-notepad"
+repository = "https://github.com/crypt0zaurus/kibosy-notepad"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

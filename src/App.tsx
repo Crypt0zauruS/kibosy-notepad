@@ -15,8 +15,34 @@ import {
 import KibosyKeyboard from "./components/KibosyKeyboard";
 import LanguageSelector from "./components/LanguageSelector";
 import ConfirmDialog from "./components/ConfirmDialog";
+import AccentPopup from "./components/AccentPopup";
 import { useI18n } from "./lib/i18n";
+import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
+
+// ========================================
+// 🔤 LETTRES KIBOSY ET VARIANTES
+// ========================================
+const KIBOSY_VARIANTS: Record<string, string[]> = {
+  b: ["B", "b", "Ɓ", "ɓ"],
+  d: ["D", "d", "Ɖ", "ɖ"],
+  j: ["J", "j", "Ĵ", "ĵ"],
+  n: ["N", "n", "Ñ", "ñ"],
+  o: ["O", "o", "Ô", "ô"],
+  s: ["S", "s", "Ŝ", "ŝ"],
+  z: ["Z", "z", "Ẑ", "ẑ"],
+};
+
+// Digrammes de l'annexe
+const ANNEXE_VARIANTS: Record<string, string[]> = {
+  a: ["ao"],
+  g: ["gn"],
+  d: ["dh", "dr", "dy"],
+  m: ["mb", "mp"],
+  n: ["ndr", "ng"],
+  t: ["tr", "ts"],
+};
 
 // ========================================
 // 🎨 TYPES
@@ -48,12 +74,19 @@ function App() {
 
   // Dialog de confirmation
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [pendingAction, setPendingAction] = useState<"new" | "open" | null>(
-    null
-  );
+  const [pendingAction, setPendingAction] = useState<
+    "new" | "open" | "close" | null
+  >(null);
+
+  // Popup d'accents Kibosy
+  const [showAccentPopup, setShowAccentPopup] = useState(false);
+  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
+  const [popupLetter, setPopupLetter] = useState("");
+  const [popupVariants, setPopupVariants] = useState<string[]>([]);
+  const [enableAutoAccent, setEnableAutoAccent] = useState(true); // Option activable
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const autosaveTimerRef = useRef<number>();
+  const autosaveTimerRef = useRef<NodeJS.Timeout>();
   const lastSavedTextRef = useRef("");
 
   // ========================================
@@ -158,6 +191,37 @@ function App() {
     };
   }, [hasUnsavedChanges]);
 
+  // Gestion spécifique Tauri pour la fermeture
+  useEffect(() => {
+    let unlisten: (() => void) | null = null;
+
+    const setupListener = async () => {
+      unlisten = await listen("close-requested", () => {
+        console.log(
+          "🚪 Close requested, hasUnsavedChanges:",
+          hasUnsavedChanges
+        );
+
+        if (hasUnsavedChanges) {
+          setShowConfirmDialog(true);
+          setPendingAction("close");
+        } else {
+          console.log("✅ No unsaved changes, closing app");
+          invoke("close_app");
+        }
+      });
+    };
+
+    setupListener();
+
+    return () => {
+      if (unlisten) {
+        console.log("🧹 Cleaning up close-requested listener");
+        unlisten();
+      }
+    };
+  }, [hasUnsavedChanges]);
+
   // ========================================
   // 🗂️ GESTION FICHIERS
   // ========================================
@@ -215,7 +279,7 @@ function App() {
   }, [t]);
 
   // Callback pour confirmer l'action
-  const handleConfirmDialog = useCallback(() => {
+  const handleConfirmDialog = useCallback(async () => {
     setShowConfirmDialog(false);
 
     if (pendingAction === "new") {
@@ -224,7 +288,9 @@ function App() {
       lastSavedTextRef.current = "";
       setHasUnsavedChanges(false);
     } else if (pendingAction === "open") {
-      executeOpen();
+      await executeOpen();
+    } else if (pendingAction === "close") {
+      invoke("close_app");
     }
 
     setPendingAction(null);
@@ -235,6 +301,91 @@ function App() {
     setShowConfirmDialog(false);
     setPendingAction(null);
   }, []);
+
+  // ========================================
+  // 🔤 GESTION POPUP ACCENTS KIBOSY
+  // ========================================
+
+  // Fonction pour obtenir la position du curseur dans le textarea
+  const getCursorPosition = useCallback(() => {
+    if (!textareaRef.current) return { x: 0, y: 0 };
+
+    const textarea = textareaRef.current;
+    const rect = textarea.getBoundingClientRect();
+
+    // Position approximative (en haut à gauche du textarea + scroll)
+    return {
+      x: rect.left + 20,
+      y: rect.top + 60 + window.scrollY,
+    };
+  }, []);
+
+  // Fonction pour insérer un caractère à la position du curseur
+  const insertAtCursor = useCallback(
+    (char: string) => {
+      if (!textareaRef.current) return;
+
+      const textarea = textareaRef.current;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const newText = text.substring(0, start) + char + text.substring(end);
+
+      setText(newText);
+
+      // Repositionner le curseur après le caractère inséré
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + char.length;
+        textarea.focus();
+      }, 0);
+    },
+    [text]
+  );
+
+  // Gérer la frappe de touches
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (!enableAutoAccent) return;
+
+      const key = e.key.toLowerCase();
+
+      // Collecter toutes les variantes pour cette touche
+      let allVariants: string[] = [];
+
+      // Ajouter les variantes Kibosy
+      if (KIBOSY_VARIANTS[key]) {
+        allVariants = [...KIBOSY_VARIANTS[key]];
+      } else {
+        // Si pas de variante Kibosy, ajouter la lettre normale
+        allVariants = [key.toUpperCase(), key];
+      }
+
+      // Ajouter les variantes de l'annexe
+      if (ANNEXE_VARIANTS[key]) {
+        allVariants = [...allVariants, ...ANNEXE_VARIANTS[key]];
+      }
+
+      // Si on a des variantes à proposer, afficher la popup
+      if (allVariants.length > 2 || KIBOSY_VARIANTS[key]) {
+        e.preventDefault(); // ✅ EMPÊCHER l'insertion de la lettre normale
+
+        const position = getCursorPosition();
+        setPopupPosition(position);
+        setPopupLetter(key);
+        setPopupVariants(allVariants);
+        setShowAccentPopup(true);
+      }
+    },
+    [enableAutoAccent, getCursorPosition]
+  );
+
+  // Sélectionner un accent
+  const handleSelectAccent = useCallback(
+    (char: string) => {
+      insertAtCursor(char);
+      setShowAccentPopup(false);
+    },
+    [insertAtCursor]
+  );
 
   const handleSaveAs = useCallback(async () => {
     try {
@@ -411,7 +562,7 @@ function App() {
           </button>
           {currentFile && (
             <span className="current-file">
-              {currentFile.split(/[\\/]/).pop()}
+              {currentFile.split(/[\\\\/]/).pop()}
               {hasUnsavedChanges && " *"}
             </span>
           )}
@@ -436,6 +587,11 @@ function App() {
             onClick={handleSave}
             className="header-btn"
             title={t("shortcuts.save")}
+            disabled={text.length === 0}
+            style={{
+              opacity: text.length === 0 ? 0.5 : 1,
+              cursor: text.length === 0 ? "not-allowed" : "pointer",
+            }}
           >
             💾 {t("menu.save")}
           </button>
@@ -463,6 +619,7 @@ function App() {
           ref={textareaRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
           className="main-textarea"
           placeholder={t("editor.placeholder")}
           spellCheck={false}
@@ -511,6 +668,27 @@ function App() {
             <span className="unsaved-indicator">● {t("status.unsaved")}</span>
           )}
           <span className="autosave-info">💾 {t("status.autosave")}</span>
+
+          {/* Toggle Auto-accent */}
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              cursor: "pointer",
+              fontSize: "0.75rem",
+              userSelect: "none",
+            }}
+            title="Activer/désactiver les suggestions automatiques de lettres Kibosy"
+          >
+            <input
+              type="checkbox"
+              checked={enableAutoAccent}
+              onChange={(e) => setEnableAutoAccent(e.target.checked)}
+              style={{ cursor: "pointer" }}
+            />
+            🔤 Auto Kibosy
+          </label>
         </div>
       </footer>
 
@@ -523,6 +701,17 @@ function App() {
         cancelText={t("dialogs.cancel")}
         onConfirm={handleConfirmDialog}
         onCancel={handleCancelDialog}
+        isDark={isDark}
+      />
+
+      {/* POPUP ACCENTS KIBOSY */}
+      <AccentPopup
+        isOpen={showAccentPopup}
+        position={popupPosition}
+        letter={popupLetter}
+        variants={popupVariants}
+        onSelect={handleSelectAccent}
+        onClose={() => setShowAccentPopup(false)}
         isDark={isDark}
       />
     </div>
